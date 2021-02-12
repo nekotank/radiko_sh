@@ -2,7 +2,7 @@
 
 playerurl=http://radiko.jp/apps/js/playerCommon.js
 
-wget -q -N --no-if-modified-since ${playerurl}
+curl --silent -L -O ${playerurl}
 if [ $? -ne 0 ]; then
     echo "failed get player"
 fi
