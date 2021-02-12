@@ -44,6 +44,7 @@ if [ $# -lt 3 ];then
 fi
 
 USERNAME=$(whoami)
+GROUP=${USERNAME}
 ID="$1"
 OFILE="$2"
 TIME=$3
@@ -138,7 +139,7 @@ if [ ! -d ${iTunes_DIR} ]; then
 fi
 
 if [ "${iTunes_DIR}" ]; then
-    chown nekotank:nekotank "${RFILE}"
+    chown ${USERNAME}:${GROUP} "${RFILE}"
     cp "${RFILE}" "${iTunes_DIR}"
     if [ "$?" = "0" ]; then
         rm -f "${RFILE}"
