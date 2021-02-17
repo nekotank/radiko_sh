@@ -49,6 +49,7 @@ ID="$1"
 OFILE="$2"
 TIME=$3
 USERHOME=/home/${USERNAME}
+iTunes_DIR="${USERHOME}/radiko/${OFILE}/"
 #------------------------------------------#
 GetAuth_SRC="${USERHOME}/src/get_auth.sh"
 #------------------------------------------#
@@ -80,9 +81,11 @@ done
 
 if [ "${CODEC}" = "libmp3lame" ];then
     RFILE="${RDIR}/${ID}_${OFILE}_${DATE1}.mp3"
-	ID3V="-id3v2_version 3"
+    M4AFILE="${RDIR}/${ID}_${OFILE}_${DATE1}.m4a"
+    ID3V="-id3v2_version 3"
 else
-    RFILE="${RDIR}/${ID}_${OFILE}_${DATE1}.m4a"
+    M4AFILE="${RDIR}/${ID}_${OFILE}_${DATE1}.m4a"
+    RFILE=${M4AFILE}
 fi
 echo "RFILE:${RFILE}"
 ### authentication
@@ -121,18 +124,27 @@ fi
     -bsf:a aac_adtstoasc \
     -y \
     -t ${TIME} \
-    "${RFILE}" \
-#    - ${ID3V} -vn -acodec ${CODEC} -ar 44100 -ab 98304 -ac 2\
-#    -metadata author="${AUTHOR}" \
-#    -metadata artist="${AUTHOR}" \
-#    -metadata title="${TITLE}" \
-#    -metadata album="${ALBUM}" \
-#    -metadata genre="${GENRE}" \
-#    -metadata year="${YEAR}" \
+    "${M4AFILE}" \
 #    2>/tmp/ffmpeg.log
 #    > /dev/null 
 
-iTunes_DIR="${USERHOME}/radiko/${OFILE}/"
+# m4a -> mp3
+if [ "${CODEC}" = "libmp3lame" ];then
+    /usr/bin/ffmpeg \
+        -loglevel error \
+        -fflags +discardcorrupt \
+        -i "${M4AFILE}" \
+        -acodec ${CODEC} ${ID3V} -vn -ar 44100 -ab 98304 -ac 2\
+        -metadata author="${AUTHOR}" \
+        -metadata artist="${AUTHOR}" \
+        -metadata title="${TITLE}" \
+        -metadata album="${ALBUM}" \
+        -metadata genre="${GENRE}" \
+        -metadata year="${YEAR}" \
+        "${RFILE}"
+    rm -f "${M4AFILE}"
+fi
+
 if [ ! -d ${iTunes_DIR} ]; then
     mkdir "${iTunes_DIR}"
     chown ${USERNAME}:${USERNAME} "${iTunes_DIR}"
